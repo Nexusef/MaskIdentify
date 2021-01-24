@@ -32,7 +32,7 @@ def detect_mask(frame, faceNet, maskNet):
     # For every detection, extract coords and face image
     for i in range(0, detections.shape[2]):
         # Extract confidences=
-        confidence = detections[0, 0, i, 0]
+        confidence = detections[0, 0, i, 2]
 
         # Filter out weak confidences
         if confidence > args["confidence"]:
@@ -45,10 +45,11 @@ def detect_mask(frame, faceNet, maskNet):
             (endX, endY) = (min(w-1, endX), min(h-1, endY))
 
             face = frame[startY:endY, startX:endX]
+            face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
             face = cv2.resize(face, (224, 224))
             face = img_to_array(face)
             face = preprocess_input(face)
-            face = np.expand_dims(face, axis=0)
+            # face = np.expand_dims(face, axis=0)
 
             faces.append(face)
             locs.append((startX, startY, endX, endY))
@@ -95,7 +96,7 @@ while True:
         color = (0, 255, 0) if label == "Mask" else (0, 0, 255)
 
         # Display probability
-        label = "{}: {:.2f}%".format(label, mask(mask, withoutMask) * 100)
+        label = "{}: {:.2f}%".format(label, max(mask, withoutMask) * 100)
 
         # Draw label and rectangle
         cv2.putText(frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
